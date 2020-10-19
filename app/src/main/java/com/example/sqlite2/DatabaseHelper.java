@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
@@ -68,5 +69,22 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             cursor = db.rawQuery(query,null);
 
         return cursor;
+    }
+
+    long updateData(String row_id, String title, String author, String pages){
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues cv = new ContentValues();
+        cv.put(COLUMN_TITLE,title);
+        cv.put(COLUMN_AUTHOR,author);
+        cv.put(COLUMN_PAGES,pages);
+
+        long result = db.update(TABLE_NAME,cv," _id=?",new String[]{row_id});
+
+        if (result == -1)
+            Toast.makeText(context,"Fallo en actualizar registro",Toast.LENGTH_SHORT).show();
+        else
+            Toast.makeText(context,String.valueOf(title)+" actualizado.",Toast.LENGTH_SHORT).show();
+
+        return result;
     }
 }
