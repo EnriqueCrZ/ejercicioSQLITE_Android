@@ -1,7 +1,10 @@
 package com.example.sqlite2;
 
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -11,7 +14,7 @@ import android.widget.Toast;
 
 public class UpdateActivity extends AppCompatActivity {
     EditText title_input, author_input, pages_input;
-    Button update_button;
+    Button update_button, delete_button;
 
     String id, title, author, pages;
 
@@ -24,9 +27,14 @@ public class UpdateActivity extends AppCompatActivity {
         author_input = findViewById(R.id.author_input_new);
         pages_input = findViewById(R.id.pages_inputs_new);
         update_button = findViewById(R.id.update_button);
+        delete_button = findViewById(R.id.delete_button);
 
         //data
         getAndSetIntentData();
+
+        ActionBar ab = getSupportActionBar();
+        if(ab != null)
+            ab.setTitle("Actualizar "+title);
 
         update_button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -48,6 +56,15 @@ public class UpdateActivity extends AppCompatActivity {
                 }
             }
         });
+
+        delete_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                confirmDialog();
+            }
+        });
+
+
     }
 
     void getAndSetIntentData(){
@@ -64,5 +81,30 @@ public class UpdateActivity extends AppCompatActivity {
         }else{
             Toast.makeText(this,"Registro inexistente",Toast.LENGTH_SHORT).show();
         }
+    }
+
+    void confirmDialog(){
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Eliminar "+title+"?");
+        builder.setMessage("Seguro que quieres eliminar "+title+"?");
+        builder.setPositiveButton("Simon", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                DatabaseHelper myDB = new DatabaseHelper(UpdateActivity.this);
+                title = title_input.getText().toString().trim();
+
+                long result = myDB.deleteData(id,title);
+
+                if(result != -1)
+                    UpdateActivity.super.finish();
+            }
+        });
+        builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+            }
+        });
+        builder.create().show();
     }
 }

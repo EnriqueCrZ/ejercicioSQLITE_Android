@@ -1,13 +1,20 @@
 package com.example.sqlite2;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
@@ -36,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(MainActivity.this,AddActivity.class);
-                startActivity(intent);
+                startActivityForResult(intent,1);
             }
         });
 
@@ -51,6 +58,13 @@ public class MainActivity extends AppCompatActivity {
         customAdapter = new CustomAdapter(MainActivity.this,this,book_id,book_title,book_author,book_pages);
         recyclerView.setAdapter(customAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this));
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflates = getMenuInflater();
+        inflates.inflate(R.menu.my_menu, menu);
+        return super.onCreateOptionsMenu(menu);
     }
 
     @Override
@@ -72,5 +86,43 @@ public class MainActivity extends AppCompatActivity {
                 book_author.add(cursor.getString(2));
                 book_pages.add(cursor.getString(3));
             }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if(item.getItemId() == R.id.delete_all){
+            confirmDialog();
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    void confirmDialog(){
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Eliminar todo?");
+        builder.setMessage("Seguro que quieres eliminar el universo?");
+        builder.setPositiveButton("Chasquear dedos", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                if(book_id.isEmpty())
+                    Toast.makeText(MainActivity.this,"No hay datos para eliminar.",Toast.LENGTH_SHORT).show();
+                else{
+                    DatabaseHelper myDB = new DatabaseHelper(MainActivity.this);
+                    myDB.deleteAll();
+
+                    Toast.makeText(MainActivity.this,"Eliminados.",Toast.LENGTH_SHORT).show();
+
+                    Intent intent = new Intent(MainActivity.this,MainActivity.class);
+                    startActivity(intent);
+                    finish();
+                }
+            }
+        });
+        builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+            }
+        });
+        builder.create().show();
     }
 }
